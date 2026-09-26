@@ -472,7 +472,7 @@ function setupEventListeners() {
   if (btnLoadUserDoc) {
     btnLoadUserDoc.addEventListener('click', async () => {
       try {
-        const resp = await fetch('/tes1.docx');
+        const resp = await fetch('tes1.docx');
         const blob = await resp.blob();
         const file = new File([blob], 'tes1.docx');
         await handleFileImport(file, 'editor');

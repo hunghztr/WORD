@@ -485,12 +485,15 @@ export class DocxService {
 
       // docx-preview renders sections: .docx-preview-section elements
       // Extract all content and inline the critical styles
-      const sections = container.querySelectorAll('section.docx-wrapper, .docx-preview-section, section, article');
+      // Only top-level sections: each one holds its body in a nested <article>, so
+      // matching both would duplicate the whole document.
+      const sections = container.querySelectorAll(':scope > section');
       let htmlParts = [];
 
       if (sections.length > 0) {
         sections.forEach(section => {
-          htmlParts.push(section.innerHTML);
+          const body = section.querySelector(':scope > article');
+          htmlParts.push(body ? body.innerHTML : section.innerHTML);
         });
       } else {
         // Fallback: take everything in the container
