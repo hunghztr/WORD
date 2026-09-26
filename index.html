@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Word - Trình Soạn Thảo Văn Bản Chuẩn A4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Times+New+Roman&display=swap" rel="stylesheet">
+  <script>
+    window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';
+  </script>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <div id="app" class="word-app">
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="docxFileInput" accept=".docx,.doc" style="display: none;">
+    <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+
+    <!-- TOP TITLE BAR (Office Blue Ribbon Header) -->
+    <header class="word-titlebar">
+      <div class="titlebar-left">
+        <div class="word-logo-badge" title="Microsoft Word">
+          <span class="w-letter">W</span>
+        </div>
+
+        <!-- Quick Access Toolbar -->
+        <div class="quick-access-toolbar">
+          <button id="qaSaveBtn" class="qa-btn" title="Lưu tài liệu (Ctrl + S)">
+            <i data-lucide="save"></i>
+          </button>
+          <button id="qaUndoBtn" class="qa-btn" title="Hoàn tác (Ctrl + Z)">
+            <i data-lucide="undo-2"></i>
+          </button>
+          <button id="qaRedoBtn" class="qa-btn" title="Làm lại (Ctrl + Y)">
+            <i data-lucide="redo-2"></i>
+          </button>
+          <button id="qaPrintBtn" class="qa-btn" title="In / Xuất PDF (Ctrl + P)">
+            <i data-lucide="printer"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="titlebar-center">
+        <div class="doc-title-wrapper" title="Bấm để đổi tên tài liệu">
+          <input type="text" id="docTitleInput" class="doc-title-input" value="Tài liệu 1" spellcheck="false">
+          <span class="doc-extension">.docx</span>
+        </div>
+        <div id="saveStatusIndicator" class="save-status-badge saved">
+          <span class="status-dot"></span>
+          <span class="status-text">Đã lưu</span>
+        </div>
+      </div>
+
+      <div class="titlebar-right">
+        <div class="window-controls">
+          <button class="win-btn" title="Thu nhỏ">─</button>
+          <button class="win-btn" title="Phóng to">🗖</button>
+          <button class="win-btn close" title="Đóng">✕</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- RIBBON NAVIGATION TABS -->
+    <nav class="word-ribbon-tabs">
+      <button class="ribbon-tab file-tab" id="tabFile">Tệp</button>
+      <button class="ribbon-tab active" data-target="panelHome">Trang đầu</button>
+      <button class="ribbon-tab" data-target="panelInsert">Chèn</button>
+      <button class="ribbon-tab" data-target="panelLayout">Bố trí</button>
+      <button class="ribbon-tab preview-tab-btn" data-target="panelPreview">
+        <span class="sparkle-dot"></span> Xem trước DOCX
+      </button>
+      <button class="ribbon-tab" data-target="panelView">Xem</button>
+
+      <div class="ribbon-actions-right">
+        <button id="btnQuickExport" class="btn-primary-subtle" title="Lưu về máy dạng Word (.docx)">
+          <i data-lucide="download"></i>
+          <span>Lưu DOCX</span>
+        </button>
+        <button id="btnQuickImport" class="btn-secondary-subtle" title="Mở file .doc / .docx từ máy tính">
+          <i data-lucide="folder-open"></i>
+          <span>Mở tệp</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- RIBBON PANELS CONTAINER -->
+    <section class="word-ribbon-panels">
+      <!-- PANEL 1: TRANG ĐẦU (HOME) - Holds CKEditor 5 Toolbar -->
+      <div class="ribbon-panel active" id="panelHome">
+        <div class="ribbon-group-ckeditor" id="ckeditorToolbarContainer">
+          <!-- CKEditor 5 Decoupled Toolbar will be mounted here -->
+        </div>
+
+        <div class="ribbon-group-linespacing">
+          <div class="word-dropdown" id="dropdownLineSpacing">
+            <button class="word-dropdown-btn" id="btnLineSpacing" title="Giãn cách dòng & đoạn văn (Line Spacing)">
+              <span class="linespacing-icon">≡↕</span>
+              <span class="linespacing-val" id="currentLineSpacingText">1.15</span>
+              <span class="dropdown-arrow">▼</span>
+            </button>
+            <div class="word-dropdown-menu" id="menuLineSpacing">
+              <div class="menu-header">Giãn cách dòng (Line Spacing):</div>
+              <button class="dropdown-item" data-lineheight="1.0">1.0 (Dòng đơn)</button>
+              <button class="dropdown-item active" data-lineheight="1.15">1.15 (Chuẩn Word)</button>
+              <button class="dropdown-item" data-lineheight="1.5">1.5 (Giãn 1.5 dòng)</button>
+              <button class="dropdown-item" data-lineheight="2.0">2.0 (Dòng đôi)</button>
+              <button class="dropdown-item" data-lineheight="2.5">2.5 (Giãn rộng)</button>
+              <button class="dropdown-item" data-lineheight="3.0">3.0 (Giãn 3 dòng)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: CHÈN (INSERT) -->
+      <div class="ribbon-panel" id="panelInsert">
+        <div class="ribbon-group">
+          <div class="group-title">Bảng & Hình ảnh</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn" id="btnInsertTable">
+              <i data-lucide="table"></i>
+              <span>Chèn bảng (3x3)</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnInsertImage">
+              <i data-lucide="image"></i>
+              <span>Chèn ảnh từ máy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ribbon-group-separator"></div>
+
+        <div class="ribbon-group">
+          <div class="group-title">Trang & Phân cách</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn" id="btnInsertPageBreak">
+              <i data-lucide="scissors"></i>
+              <span>Ngắt trang</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnInsertHr">
+              <i data-lucide="minus"></i>
+              <span>Đường phân cách</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ribbon-group-separator"></div>
+
+        <div class="ribbon-group">
+          <div class="group-title">Liên kết</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn" id="btnInsertLink">
+              <i data-lucide="link"></i>
+              <span>Chèn liên kết</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: BỐ TRÍ (LAYOUT) -->
+      <div class="ribbon-panel" id="panelLayout">
+        <div class="ribbon-group">
+          <div class="group-title">Lề trang</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn active-margin" id="btnMarginNormal" data-margin="normal">
+              <i data-lucide="maximize"></i>
+              <span>Chuẩn (2.54cm)</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnMarginNarrow" data-margin="narrow">
+              <i data-lucide="minimize"></i>
+              <span>Hẹp (1.27cm)</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnMarginWide" data-margin="wide">
+              <i data-lucide="move"></i>
+              <span>Rộng (3.8cm)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ribbon-group-separator"></div>
+
+        <div class="ribbon-group">
+          <div class="group-title">Hướng giấy</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn active-orient" id="btnOrientPortrait" data-orient="portrait">
+              <i data-lucide="file"></i>
+              <span>Khổ dọc</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnOrientLandscape" data-orient="landscape">
+              <i data-lucide="file-minus"></i>
+              <span>Khổ ngang</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ribbon-group-separator"></div>
+
+        <div class="ribbon-group">
+          <div class="group-title">Khổ giấy</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn active-size" id="btnSizeA4" data-size="a4">
+              <i data-lucide="file-text"></i>
+              <span>Khổ A4 (210×297)</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnSizeLetter" data-size="letter">
+              <i data-lucide="file-text"></i>
+              <span>Letter (216×279)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 4: XEM TRƯỚC DOCX (DOCX PREVIEW) -->
+      <div class="ribbon-panel" id="panelPreview">
+        <div class="ribbon-group">
+          <div class="group-title">Tệp DOCX & Thư viện docx-preview</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn primary" id="btnOpenDocxForPreview">
+              <i data-lucide="file-search"></i>
+              <span>Mở tệp .docx để xem</span>
+            </button>
+            <button class="ribbon-action-btn success" id="btnImportDocxToEditor" disabled>
+              <i data-lucide="edit-3"></i>
+              <span>Nạp vào Soạn thảo</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnSwitchToEditor">
+              <i data-lucide="arrow-left-right"></i>
+              <span>Về khung Soạn thảo</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnLoadUserDoc">
+              <i data-lucide="file-text"></i>
+              <span>Nạp tes1.docx</span>
+            </button>
+          </div>
+        </div>
+        <div class="preview-panel-info">
+          <div class="info-badge">
+            <i data-lucide="info"></i>
+            <span>Chế độ <strong>docx-preview</strong> hiển thị nguyên bản 100% định dạng đồ họa từ file DOCX nhị phân gốc.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 5: XEM (VIEW) -->
+      <div class="ribbon-panel" id="panelView">
+        <div class="ribbon-group">
+          <div class="group-title">Hiển thị</div>
+          <div class="group-buttons horizontal">
+            <label class="ribbon-checkbox-label">
+              <input type="checkbox" id="toggleRuler" checked>
+              <span>Thước đo ngang (Ruler)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="ribbon-group-separator"></div>
+
+        <div class="ribbon-group">
+          <div class="group-title">Thu phóng</div>
+          <div class="group-buttons">
+            <button class="ribbon-action-btn" id="btnZoom100">
+              <i data-lucide="scan"></i>
+              <span>100%</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnZoomFit">
+              <i data-lucide="maximize-2"></i>
+              <span>Vừa chiều rộng</span>
+            </button>
+            <button class="ribbon-action-btn" id="btnToggleFullscreen">
+              <i data-lucide="expand"></i>
+              <span>Toàn màn hình</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HORIZONTAL RULER (THƯỚC ĐO WORD) -->
+    <div class="word-ruler-container" id="rulerContainer">
+      <div class="ruler-body" id="rulerBody">
+        <!-- Ruler marks generated via JS / CSS -->
+      </div>
+    </div>
+
+    <!-- MAIN WORKSPACE (XÁM OFFICE + TRANG GIẤY A4) -->
+    <main class="word-workspace" id="wordWorkspace">
+      <!-- MODE 1: CHỈNH SỬA VỚI CKEDITOR 5 -->
+      <div class="page-viewport" id="editorViewport">
+        <div class="word-page a4-page portrait margin-normal" id="wordPage">
+          <div class="page-margin-marker top-left"></div>
+          <div class="page-margin-marker top-right"></div>
+          <div class="page-margin-marker bottom-left"></div>
+          <div class="page-margin-marker bottom-right"></div>
+
+          <!-- CKEditor Decoupled Editable Area -->
+          <div id="editor" class="word-editor-content">
+            <h1 style="color: #1f4e79;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h1>
+            <p style="text-align: center; font-weight: bold; margin-bottom: 24px;">Độc lập - Tự do - Hạnh phúc</p>
+            <hr>
+            <h2 style="color: #2e75b6; margin-top: 20px;">BÁO CÁO CÔNG VIỆC VÀ TÀI LIỆU SOẠN THẢO</h2>
+            <p>Chào mừng bạn đến với <strong>Trình soạn thảo văn bản mô phỏng Microsoft Word</strong> được xây dựng bằng <strong>CKEditor 5</strong> và công nghệ kết xuất <strong>docx-preview</strong>.</p>
+            <p>Trình soạn thảo hỗ trợ đầy đủ các tính năng văn phòng:</p>
+            <ul>
+              <li><strong>Mở file .docx, .doc:</strong> Bấm nút <em>"Mở tệp"</em> ở góc phải để nạp văn bản hiện có hoặc xem trước nguyên bản.</li>
+              <li><strong>Lưu file sau khi sửa:</strong> Bấm nút <em>"Lưu DOCX"</em> hoặc phím tắt <code>Ctrl + S</code> để xuất file Microsoft Word chuẩn tải về máy.</li>
+              <li><strong>Định dạng nâng cao:</strong> Phông chữ Times New Roman / Calibri, cỡ chữ, căn đều 2 bên (Justify), chèn Bảng, Ảnh, Ngắt trang A4.</li>
+            </ul>
+            <table style="width: 100%; border: 1px solid #bfbfbf; border-collapse: collapse; margin-top: 15px;">
+              <thead>
+                <tr style="background-color: #f2f2f2;">
+                  <th style="padding: 8px; border: 1px solid #bfbfbf;">STT</th>
+                  <th style="padding: 8px; border: 1px solid #bfbfbf;">Tính năng</th>
+                  <th style="padding: 8px; border: 1px solid #bfbfbf;">Công nghệ</th>
+                  <th style="padding: 8px; border: 1px solid #bfbfbf;">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">1</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">Trình soạn thảo văn bản A4</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">CKEditor 5 Decoupled</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf; color: #107c41; font-weight: bold;">Hoạt động tốt</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">2</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">Xem trước chuẩn DOCX 100%</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">docx-preview</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf; color: #107c41; font-weight: bold;">Sẵn sàng</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">3</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">Nhập file DOCX & Lưu file Word</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf;">mammoth + html-docx</td>
+                  <td style="padding: 8px; border: 1px solid #bfbfbf; color: #107c41; font-weight: bold;">Hoàn tất</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 20px;"><em>Bạn có thể xóa nội dung mẫu này và bắt đầu nhập liệu văn bản của mình ngay bây giờ!</em></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 2: XEM TRƯỚC DOCX NGUYÊN BẢN (DOCX-PREVIEW CONTAINER) -->
+      <div class="docx-preview-viewport" id="previewViewport" style="display: none;">
+        <div class="preview-top-banner">
+          <div class="banner-left">
+            <span class="banner-tag">Chế độ xem trước DOCX</span>
+            <span class="preview-filename" id="previewFileName">Tài liệu nguyên bản</span>
+          </div>
+          <div class="banner-right">
+            <button class="btn-banner-action" id="btnBannerTransferToEditor">
+              <i data-lucide="edit-3"></i>
+              <span>Chuyển sang Soạn thảo để sửa</span>
+            </button>
+            <button class="btn-banner-action secondary" id="btnBannerDownloadDocx">
+              <i data-lucide="download"></i>
+              <span>Tải file gốc</span>
+            </button>
+            <button class="btn-banner-close" id="btnClosePreview" title="Đóng xem trước">✕</button>
+          </div>
+        </div>
+        <div class="docx-render-target" id="docxRenderTarget">
+          <!-- docx-preview will render A4 pages here -->
+        </div>
+      </div>
+    </main>
+
+    <!-- BACKSTAGE FILE MENU (MENU TỆP CỦA WORD) -->
+    <div class="word-backstage-modal" id="backstageModal" style="display: none;">
+      <div class="backstage-overlay" id="backstageOverlay"></div>
+      <div class="backstage-container">
+        <aside class="backstage-sidebar">
+          <button class="backstage-back-btn" id="btnBackstageBack" title="Quay lại">
+            <i data-lucide="arrow-left"></i>
+          </button>
+          <div class="backstage-nav">
+            <button class="backstage-nav-item active" data-content="bsInfo">Thông tin</button>
+            <button class="backstage-nav-item" data-content="bsNew">Mới</button>
+            <button class="backstage-nav-item" data-content="bsOpen">Mở tệp</button>
+            <button class="backstage-nav-item" data-content="bsSave">Lưu (Save)</button>
+            <button class="backstage-nav-item" data-content="bsSaveAs">Lưu dưới dạng (Save As)</button>
+            <button class="backstage-nav-item" data-content="bsPrint">In ấn (Print)</button>
+          </div>
+        </aside>
+
+        <section class="backstage-content">
+          <!-- Backstage Info Tab -->
+          <div class="backstage-tab-content active" id="bsInfo">
+            <h2>Thông tin tài liệu</h2>
+            <div class="doc-info-card">
+              <div class="doc-info-row">
+                <span class="label">Tên tài liệu:</span>
+                <span class="value" id="bsDocName">Tài liệu 1.docx</span>
+              </div>
+              <div class="doc-info-row">
+                <span class="label">Định dạng hỗ trợ:</span>
+                <span class="value">Microsoft Word (.docx, .doc)</span>
+              </div>
+              <div class="doc-info-row">
+                <span class="label">Số từ:</span>
+                <span class="value" id="bsWordCount">0 từ</span>
+              </div>
+              <div class="doc-info-row">
+                <span class="label">Công nghệ:</span>
+                <span class="value">CKEditor 5 Decoupled (Community) + docx-preview</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backstage New Tab -->
+          <div class="backstage-tab-content" id="bsNew">
+            <h2>Tạo tài liệu mới</h2>
+            <div class="templates-grid">
+              <div class="template-card" id="btnNewBlankDoc">
+                <div class="template-thumb blank"></div>
+                <span>Tài liệu trống (Blank Document)</span>
+              </div>
+              <div class="template-card" id="btnNewReportDoc">
+                <div class="template-thumb report"></div>
+                <span>Mẫu Báo cáo công việc</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backstage Open Tab -->
+          <div class="backstage-tab-content" id="bsOpen">
+            <h2>Mở tệp văn bản từ máy tính</h2>
+            <p class="section-desc">Hỗ trợ định dạng Microsoft Word <code>.docx</code> hoặc <code>.doc</code>.</p>
+            <div class="dropzone-area" id="backstageDropzone">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <h3>Kéo và thả tệp Word vào đây</h3>
+              <p>hoặc</p>
+              <button class="btn-primary-large" id="btnBrowseFile">
+                <i data-lucide="folder-open"></i>
+                <span>Duyệt tệp từ máy tính</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Backstage Save As Tab -->
+          <div class="backstage-tab-content" id="bsSaveAs">
+            <h2>Lưu dưới dạng / Xuất tệp</h2>
+            <div class="export-options-list">
+              <div class="export-card" id="btnExportDocx">
+                <div class="export-icon word">W</div>
+                <div class="export-info">
+                  <h3>Tài liệu Word (.docx)</h3>
+                  <p>Lưu toàn bộ nội dung đã sửa về máy tính với định dạng Microsoft Word chuẩn.</p>
+                </div>
+                <button class="btn-export-action">Tải về .docx</button>
+              </div>
+
+              <div class="export-card" id="btnExportHtml">
+                <div class="export-icon html">&lt;/&gt;</div>
+                <div class="export-info">
+                  <h3>Trang Web (.html)</h3>
+                  <p>Xuất tài liệu dưới dạng mã nguồn HTML sạch có nhúng CSS định dạng.</p>
+                </div>
+                <button class="btn-export-action">Tải về .html</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backstage Print Tab -->
+          <div class="backstage-tab-content" id="bsPrint">
+            <h2>In ấn & Xuất PDF</h2>
+            <p>Trang in được thiết kế tối ưu đúng chuẩn A4 (210mm × 297mm) không chứa thanh công cụ.</p>
+            <button class="btn-primary-large" id="btnExecutePrint">
+              <i data-lucide="printer"></i>
+              <span>Tiến hành In / Lưu dạng PDF</span>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- BOTTOM STATUS BAR (THANH TRẠNG THÁI CHUẨN WORD) -->
+    <footer class="word-statusbar">
+      <div class="statusbar-left">
+        <span class="status-item" id="sbPageCount">Trang 1 / 1</span>
+        <span class="status-separator">|</span>
+        <span class="status-item" id="sbWordCount">142 từ</span>
+        <span class="status-separator">|</span>
+        <span class="status-item" id="sbCharCount">890 ký tự</span>
+        <span class="status-separator">|</span>
+        <span class="status-item">Tiếng Việt</span>
+      </div>
+
+      <div class="statusbar-center" id="sbMessage">
+        Sẵn sàng soạn thảo
+      </div>
+
+      <div class="statusbar-right">
+        <div class="view-modes">
+          <button class="view-mode-btn active" title="Bố trí in ấn (Print Layout)">
+            <i data-lucide="file-text"></i>
+          </button>
+          <button class="view-mode-btn" id="sbToggleFullscreen" title="Toàn màn hình">
+            <i data-lucide="expand"></i>
+          </button>
+        </div>
+
+        <div class="zoom-controls">
+          <button class="zoom-btn" id="btnZoomOut" title="Thu nhỏ">─</button>
+          <input type="range" id="zoomSlider" min="50" max="180" value="100" class="zoom-slider">
+          <button class="zoom-btn" id="btnZoomIn" title="Phóng to">┼</button>
+          <span class="zoom-value" id="zoomValueText">100%</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="word-toast" id="wordToast">
+      <span class="toast-icon">✓</span>
+      <span class="toast-message" id="toastMessage">Thông báo</span>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

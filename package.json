@@ -1,0 +1,26 @@
+{
+  "name": "word",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "vite": "^8.3.1"
+  },
+  "dependencies": {
+    "ckeditor5": "^48.5.2",
+    "docx-preview": "^0.4.1",
+    "file-saver": "^2.0.5",
+    "html-docx-js-typescript": "^0.1.5",
+    "lucide": "^1.48.0",
+    "mammoth": "^1.12.3"
+  }
+}
